@@ -5,27 +5,37 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
-import org.kangwooju.skeleton_user.common.security.dto.LoginRequest;
+import lombok.AllArgsConstructor;
+import org.kangwooju.skeleton_user.common.security.auth.UserDetailsImpl;
+import org.kangwooju.skeleton_user.common.security.dto.request.LoginRequest;
+import org.kangwooju.skeleton_user.common.security.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
+import java.util.Iterator;
 
 @Component
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
 
-    private final ObjectMapper objectMapper;
-    private final AuthenticationManager authenticationManager;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    @Autowired
+    private JwtUtil jwtUtil;
+
 
 
     @Override
@@ -53,6 +63,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         }
     }
 
+    // 로그인 성공 메소드
     @Override
     protected void successfulAuthentication
             (HttpServletRequest request,
@@ -61,6 +72,18 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
              Authentication authResult)
             throws IOException, ServletException {
 
+        UserDetailsImpl userDetails = (UserDetailsImpl) authResult.getPrincipal();
+        String username = userDetails.getUsername();
+
+        Collection<? extends GrantedAuthority> authorities = authResult.getAuthorities();
+        Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
+        GrantedAuthority grantedAuthority = iterator.next();
+
+        String role = grantedAuthority.getAuthority();
+
+        String token = jwtUtil.createJwt(username,role,60*60*10L);
+
+        response.setHeader("Authorization", "Bearer "+token);
     }
 
     @Override
@@ -69,6 +92,10 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
              HttpServletResponse response,
              AuthenticationException failed)
             throws IOException, ServletException {
+
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
 
 
 
