@@ -3,6 +3,7 @@ package org.kangwooju.skeleton_user.common.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.kangwooju.skeleton_user.common.security.filter.LoginFilter;
+import org.kangwooju.skeleton_user.common.security.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +27,8 @@ public class SecurityConfig {
 
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Bean
     public AuthenticationManager authenticationManager
@@ -56,7 +59,9 @@ public class SecurityConfig {
                 .httpBasic((auth)->auth.disable());
 
         httpSecurity
-                .addFilterAt(new LoginFilter(objectMapper,authenticationManager(authenticationConfiguration)),
+                .addFilterAt(new LoginFilter(objectMapper,
+                                authenticationManager(authenticationConfiguration),
+                                jwtUtil),
                         UsernamePasswordAuthenticationFilter.class);
         // 세션을 유지하지 않도록 하는 설정 -> STATELESS
         httpSecurity
