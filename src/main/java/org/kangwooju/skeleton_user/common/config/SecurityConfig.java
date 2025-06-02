@@ -1,15 +1,39 @@
 package org.kangwooju.skeleton_user.common.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import org.kangwooju.skeleton_user.common.security.filter.LoginFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import javax.crypto.SecretKey;
 
 @EnableWebSecurity
 @Configuration
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final AuthenticationConfiguration authenticationConfiguration;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Bean
+    public AuthenticationManager authenticationManager
+            (AuthenticationConfiguration authenticationConfiguration)
+             throws Exception{
+
+        return authenticationConfiguration.getAuthenticationManager();
+    }
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder(){
@@ -18,7 +42,8 @@ public class SecurityConfig {
 
     // 시큐리티 필터 체인 설정
     @Bean
-    public SecurityFilterChain SecurityfilterChain(HttpSecurity httpSecurity)
+    public SecurityFilterChain SecurityfilterChain(HttpSecurity httpSecurity,
+                                                   LoginFilter loginFilter)
             throws Exception {
 
         httpSecurity
@@ -29,6 +54,14 @@ public class SecurityConfig {
 
         httpSecurity
                 .httpBasic((auth)->auth.disable());
+
+        httpSecurity
+                .addFilterAt(new LoginFilter(objectMapper,authenticationManager(authenticationConfiguration)),
+                        UsernamePasswordAuthenticationFilter.class);
+        // 세션을 유지하지 않도록 하는 설정 -> STATELESS
+        httpSecurity
+                .sessionManagement((session)->session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         // Http 주소허용 여부 설정 -> Default
         httpSecurity

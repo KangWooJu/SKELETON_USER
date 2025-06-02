@@ -1,5 +1,6 @@
 package org.kangwooju.skeleton_user.domain.user.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.kangwooju.skeleton_user.domain.user.dto.request.UserCreationRequest;
 import org.kangwooju.skeleton_user.domain.user.dto.request.UserDuplicationTestNickname;
 import org.kangwooju.skeleton_user.domain.user.dto.request.UserDuplicationTestUsername;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+
 public class UserController {
 
     @Autowired

@@ -1,6 +1,7 @@
 package org.kangwooju.skeleton_user.domain.user.service;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.kangwooju.skeleton_user.domain.user.dto.request.UserCreationRequest;
 import org.kangwooju.skeleton_user.domain.user.dto.response.UserCreationResponse;
 import org.kangwooju.skeleton_user.domain.user.entity.Role;
