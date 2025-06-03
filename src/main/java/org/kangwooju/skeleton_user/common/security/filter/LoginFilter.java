@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.kangwooju.skeleton_user.common.security.auth.UserDetailsImpl;
 import org.kangwooju.skeleton_user.common.security.dto.request.LoginRequest;
+import org.kangwooju.skeleton_user.common.security.dto.response.LoginFailedResponse;
 import org.kangwooju.skeleton_user.common.security.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,17 +26,24 @@ import java.util.Collection;
 import java.util.Iterator;
 
 @Component
-@AllArgsConstructor
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
+    private final ObjectMapper objectMapper;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-    @Autowired
-    private AuthenticationManager authenticationManager;
-    @Autowired
-    private JwtUtil jwtUtil;
 
+    private final AuthenticationManager authenticationManager;
+
+
+    private final JwtUtil jwtUtil;
+
+    public LoginFilter(ObjectMapper objectMapper,
+                       AuthenticationManager authenticationManager,
+                       JwtUtil jwtUtil){
+        this.objectMapper = objectMapper;
+        this.authenticationManager = authenticationManager;
+        this.jwtUtil = jwtUtil;
+        setAuthenticationManager(authenticationManager);
+    }
 
 
     @Override
@@ -97,7 +105,13 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
+        LoginFailedResponse loginFailedResponse =
+                new LoginFailedResponse(false,
+                                        "AUTH_FAILED", // CustomException생성시 리팩토링 예정
+                                        "아이디 또는 비밀번호가 일치하지 않습니다.");
 
+        String json = objectMapper.writeValueAsString(loginFailedResponse);
 
+        response.getWriter().write(json); // 프론트에서 JSON 형식을 받아 사용할 수 있도록 전달
     }
 }
