@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 public record UserCreationRequest(String username,
                                   String password,
-                                  String nickname,
-                                  LocalDateTime creationDate) {
+                                  String nickname) {
 
 }
