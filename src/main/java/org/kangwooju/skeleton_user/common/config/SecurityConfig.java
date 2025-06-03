@@ -24,12 +24,19 @@ import javax.crypto.SecretKey;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Autowired
-    private  AuthenticationConfiguration authenticationConfiguration;
-    @Autowired
-    private ObjectMapper objectMapper;
-    @Autowired
-    private JwtUtil jwtUtil;
+
+    private final AuthenticationConfiguration authenticationConfiguration;
+    private final ObjectMapper objectMapper;
+    private final JwtUtil jwtUtil;
+    private final LoginFilter loginFilter;
+
+    // LoginFilter를 Config에서 bean으로 등록
+    @Bean
+    public LoginFilter loginFilter(ObjectMapper objectMapper,
+                                   AuthenticationConfiguration authenticationConfiguration,
+                                   JwtUtil jwtUtil) throws Exception{
+        return new LoginFilter(objectMapper,authenticationManager(authenticationConfiguration),jwtUtil);
+    }
 
     @Bean
     public AuthenticationManager authenticationManager
@@ -60,9 +67,7 @@ public class SecurityConfig {
                 .httpBasic((auth)->auth.disable());
 
         httpSecurity
-                .addFilterAt(new LoginFilter(objectMapper,
-                                authenticationManager(authenticationConfiguration),
-                                jwtUtil),
+                .addFilterAt(loginFilter,
                         UsernamePasswordAuthenticationFilter.class);
         // 세션을 유지하지 않도록 하는 설정 -> STATELESS
         httpSecurity

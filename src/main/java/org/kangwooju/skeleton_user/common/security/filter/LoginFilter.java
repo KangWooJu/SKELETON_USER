@@ -61,7 +61,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
             UsernamePasswordAuthenticationToken token =
                     new UsernamePasswordAuthenticationToken(loginRequest.username(),
-                                                            loginRequest.passowrd());
+                                                            loginRequest.password());
 
             return authenticationManager.authenticate(token);
 
