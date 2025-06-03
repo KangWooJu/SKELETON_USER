@@ -7,6 +7,7 @@ import org.kangwooju.skeleton_user.common.security.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -23,8 +24,8 @@ import javax.crypto.SecretKey;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final AuthenticationConfiguration authenticationConfiguration;
-
+    @Autowired
+    private  AuthenticationConfiguration authenticationConfiguration;
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
@@ -71,8 +72,7 @@ public class SecurityConfig {
         // Http 주소허용 여부 설정 -> Default
         httpSecurity
                 .authorizeHttpRequests((auth)->auth
-                        .requestMatchers("/login").permitAll()
-                        .requestMatchers("/admin","/").hasRole("ADMIN")
+                        .requestMatchers("/login", "/","/user/**").permitAll()
                         .anyRequest().authenticated()
                 );
 
