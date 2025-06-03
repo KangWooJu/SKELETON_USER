@@ -39,8 +39,7 @@ public class UserService {
 
         UserCreationResponse userCreationResponse
                 = new UserCreationResponse(userCreationRequest.username(),
-                userCreationRequest.nickname(),
-                userCreationRequest.creationDate());
+                userCreationRequest.nickname());
 
         userRepository.save(user);
         return userCreationResponse;
@@ -73,10 +72,5 @@ public class UserService {
 
         return result;
     }
-
-
-
-
-
 
 }
