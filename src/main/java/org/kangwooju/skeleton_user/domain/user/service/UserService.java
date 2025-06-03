@@ -1,7 +1,6 @@
 package org.kangwooju.skeleton_user.domain.user.service;
 
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 import org.kangwooju.skeleton_user.domain.user.dto.request.UserCreationRequest;
 import org.kangwooju.skeleton_user.domain.user.dto.response.UserCreationResponse;
 import org.kangwooju.skeleton_user.domain.user.entity.Role;
@@ -46,6 +45,7 @@ public class UserService {
 
     }
 
+    @Transactional(readOnly = true)
     // 회원가입 시 Username 중복을 테스트 하는 로직
     public boolean TestDuplicationUsername(String username){
 
@@ -55,11 +55,11 @@ public class UserService {
 
         BiPredicate<String,String> matches = String::equals;
         boolean result = matches.test(findUser.getUsername(),username);
-
         return result;
 
     }
 
+    @Transactional(readOnly = true)
     // 회원가입 시 Nickname 중복을 테스트 하는 로직
     public boolean TestDuplicationNickname(String nickname){
 
