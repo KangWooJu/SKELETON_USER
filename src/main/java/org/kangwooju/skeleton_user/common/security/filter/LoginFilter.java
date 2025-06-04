@@ -3,6 +3,7 @@ package org.kangwooju.skeleton_user.common.security.filter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
@@ -11,6 +12,7 @@ import org.kangwooju.skeleton_user.common.security.dto.request.LoginRequest;
 import org.kangwooju.skeleton_user.common.security.dto.response.LoginFailedResponse;
 import org.kangwooju.skeleton_user.common.security.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -71,6 +73,15 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         }
     }
 
+    public Cookie createCookie(String key,String value){
+
+        Cookie cookie = new Cookie(key,value);
+        cookie.setMaxAge(24*60*60);
+        cookie.setHttpOnly(true);
+
+        return cookie;
+    }
+
     // 로그인 성공 메소드
     @Override
     protected void successfulAuthentication
@@ -80,8 +91,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
              Authentication authResult)
             throws IOException, ServletException {
 
-        UserDetailsImpl userDetails = (UserDetailsImpl) authResult.getPrincipal();
-        String username = userDetails.getUsername();
+        String username = authResult.getName(); // Principal의 username을 반환
 
         Collection<? extends GrantedAuthority> authorities = authResult.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
@@ -89,9 +99,12 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String role = grantedAuthority.getAuthority();
 
-        String token = jwtUtil.createJwt(username,role,60*60*10L);
+        String access = jwtUtil.createJwt("access",username,role,600000L);
+        String refresh = jwtUtil.createJwt("refresh",username,role,8640000L);
 
-        response.setHeader("Authorization", "Bearer " + token);
+        response.setHeader("accessToken",access);
+        response.addCookie(createCookie("refreshToken",refresh));
+        response.setStatus(HttpStatus.OK.value());
     }
 
     @Override
