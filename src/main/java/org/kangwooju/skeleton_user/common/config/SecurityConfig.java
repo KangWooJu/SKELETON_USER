@@ -7,10 +7,8 @@ import org.kangwooju.skeleton_user.common.security.filter.JWTFilter;
 import org.kangwooju.skeleton_user.common.security.filter.LoginFilter;
 import org.kangwooju.skeleton_user.common.security.util.JwtUtil;
 import org.kangwooju.skeleton_user.domain.user.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -22,8 +20,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
-import javax.crypto.SecretKey;
-import java.util.Collection;
 import java.util.Collections;
 
 @EnableWebSecurity
@@ -35,21 +31,17 @@ public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final ObjectMapper objectMapper;
     private final JwtUtil jwtUtil;
-    private final LoginFilter loginFilter;
-    private final JWTFilter jwtFilter;
     private final UserRepository userRepository;
 
     @Bean
-    public JWTFilter jwtFilter(JwtUtil jwtUtil,UserRepository userRepository){
+    public JWTFilter jwtFilter(){
         return new JWTFilter(jwtUtil,userRepository);
     }
 
 
     // LoginFilter를 Config에서 bean으로 등록
     @Bean
-    public LoginFilter loginFilter(ObjectMapper objectMapper,
-                                   AuthenticationConfiguration authenticationConfiguration,
-                                   JwtUtil jwtUtil) throws Exception{
+    public LoginFilter loginFilter() throws Exception{
         return new LoginFilter(objectMapper,authenticationManager(authenticationConfiguration),jwtUtil);
     }
 
@@ -58,7 +50,7 @@ public class SecurityConfig {
             (AuthenticationConfiguration authenticationConfiguration)
              throws Exception{
 
-        return authenticationConfiguration.getAuthenticationManager();
+        return this.authenticationConfiguration.getAuthenticationManager();
     }
 
     @Bean
@@ -85,7 +77,7 @@ public class SecurityConfig {
                 .addFilterAt(loginFilter,
                         UsernamePasswordAuthenticationFilter.class); // 필터 순서 2
         httpSecurity
-                .addFilterBefore(jwtFilter, LoginFilter.class); // 필터 순서 1
+                .addFilterBefore(jwtFilter()    , LoginFilter.class); // 필터 순서 1
 
         // CORS 설정
         httpSecurity
