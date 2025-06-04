@@ -1,11 +1,15 @@
 package org.kangwooju.skeleton_user.common.security.filter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.kangwooju.skeleton_user.common.security.auth.UserDetailsImpl;
+import org.kangwooju.skeleton_user.common.security.dto.response.ExpiredJwtResponse;
+import org.kangwooju.skeleton_user.common.security.dto.response.InvalidTokenCategoryResponse;
 import org.kangwooju.skeleton_user.common.security.util.JwtUtil;
 import org.kangwooju.skeleton_user.domain.user.entity.User;
 import org.kangwooju.skeleton_user.domain.user.repository.UserRepository;
@@ -16,7 +20,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -27,10 +33,15 @@ public class JWTFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
+    private final ObjectMapper objectMapper;
 
-    public JWTFilter(JwtUtil jwtUtil,UserRepository userRepository){
+    public JWTFilter(JwtUtil jwtUtil,
+                     UserRepository userRepository,
+                     ObjectMapper objectMapper){
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
+        this.objectMapper = objectMapper;
+
 
     }
 
@@ -40,29 +51,37 @@ public class JWTFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         String accessToken = extractToken(request);
+        String category = jwtUtil.getCategory(accessToken);
         // 토큰이 비었는지 검사
         if(accessToken == null){
             log.info(" AccessToken NULL "+" [ Time : " + LocalDateTime.now() + " ]");
-            filterChain.doFilter(request,response);
+            filterChain.doFilter(request,response); // 다음 필터 진행
             return;
         }
 
         log.info("Authorization NOW : " + accessToken + " [ Time : " + LocalDateTime.now() + " ]");
-        String token = accessToken.split(" ")[1];
 
-        // 토큰 만료여부 확인
-        if(jwtUtil.isExpired(token)){
-            log.info(" Token EXPIRED : " + accessToken + " [ Time : " + LocalDateTime.now() + " ]");
+        // 토큰 만료 여부 확인, 만료시 다음 필터로 넘기지 않음
+        try{
+            jwtUtil.isExpired(accessToken);
+        } catch (ExpiredJwtException e){
+            handleExpiredJwt(response);
             filterChain.doFilter(request,response);
             return;
         }
 
+        if(!category.equals("access")){
+            log.info("Token Invalid Category " + " [ Time : " + LocalDateTime.now() + " ]");
+            handleInvalidTokenCategory(response,category);
+            return;
+        }
+
         // makeToken()메소드를 사용해서 토큰 생성 후
-        SecurityContextHolder.getContext().setAuthentication(makeToken(token));
-        filterChain.doFilter(request,response);
+        SecurityContextHolder.getContext().setAuthentication(makeToken(accessToken));
+        filterChain.doFilter(request,response); // 다음 필터 진행
     }
 
-    public String extractToken(HttpServletRequest request){
+    private String extractToken(HttpServletRequest request){
         String header = request.getHeader("Authorization");
         if(header == null || !header.startsWith("Bearer ")){
             return null;
@@ -70,7 +89,7 @@ public class JWTFilter extends OncePerRequestFilter {
         return header.substring(7);
     }
 
-    public Authentication makeToken(String token){
+    private Authentication makeToken(String token){
         String username = jwtUtil.getUsername(token);
         String role = jwtUtil.getRole(token);
 
@@ -92,4 +111,41 @@ public class JWTFilter extends OncePerRequestFilter {
 
         return authentication;
     }
+
+    private void handleExpiredJwt(HttpServletResponse response) throws IOException{
+
+        // 토큰 만료 여부 확인, 만료시 다음 필터로 넘기지 않음
+            ExpiredJwtResponse expiredJwtResponse =
+                    new ExpiredJwtResponse("Expired","JwtToken Has Expired" +
+                            " [ Time : " +
+                            LocalDateTime.now() +
+                            " ]");
+
+            String json = objectMapper.writeValueAsString(expiredJwtResponse);
+            //response body
+            response.getWriter().write(json);
+            //response status code
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 상태코드 추가
+            response.setContentType("application/json;charset=UTF-8"); // Content-Type 지정
+
+    }
+
+    private void handleInvalidTokenCategory(HttpServletResponse response,
+                                            String category) throws IOException{
+
+        InvalidTokenCategoryResponse invalidTokenCategoryResponse =
+                new InvalidTokenCategoryResponse(category,"Invalid Token Category Found" +
+                        " [ Time : " +
+                        LocalDateTime.now() +
+                        " ]");
+
+        String json = objectMapper.writeValueAsString(invalidTokenCategoryResponse);
+        response.getWriter().write(json);
+
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json;charset=UTF-8");
+
+    }
+
+
 }
