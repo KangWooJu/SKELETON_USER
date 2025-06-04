@@ -1,6 +1,7 @@
 package org.kangwooju.skeleton_user.common.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.kangwooju.skeleton_user.common.security.filter.JWTFilter;
 import org.kangwooju.skeleton_user.common.security.filter.LoginFilter;
@@ -18,8 +19,12 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 import javax.crypto.SecretKey;
+import java.util.Collection;
+import java.util.Collections;
 
 @EnableWebSecurity
 @Configuration
@@ -81,6 +86,23 @@ public class SecurityConfig {
                         UsernamePasswordAuthenticationFilter.class); // 필터 순서 2
         httpSecurity
                 .addFilterBefore(jwtFilter, LoginFilter.class); // 필터 순서 1
+
+        // CORS 설정
+        httpSecurity
+                .cors((corsCustomizer)->corsCustomizer.configurationSource(new CorsConfigurationSource() {
+                    @Override
+                    public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+                        CorsConfiguration configuration = new CorsConfiguration();
+
+                        configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000")); // 허용 출처 지정
+                        configuration.setAllowedMethods(Collections.singletonList("*")); // HTTP 메소드 지정
+                        configuration.setAllowCredentials(true); // 인증 정보를 포함한 요청을 허용
+                        configuration.setAllowedHeaders(Collections.singletonList("*")); // 클라이언트 요청 시 보낼 수 있는 헤더 지정
+                        configuration.setMaxAge(3600L); // 브라우저 preflight 요청캐싱 시간 지정
+
+                        return configuration;
+                    }
+                }));
         // 세션을 유지하지 않도록 하는 설정 -> STATELESS
         httpSecurity
                 .sessionManagement((session)->session
