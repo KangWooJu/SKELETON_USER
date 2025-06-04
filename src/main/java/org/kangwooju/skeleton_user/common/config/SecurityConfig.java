@@ -104,6 +104,7 @@ public class SecurityConfig {
         httpSecurity
                 .authorizeHttpRequests((auth)->auth
                         .requestMatchers("/login", "/","/user/**").permitAll()
+                        .requestMatchers("/refresh").permitAll()
                         .anyRequest().authenticated()
                 );
 
