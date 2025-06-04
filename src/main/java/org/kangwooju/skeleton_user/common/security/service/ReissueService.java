@@ -42,7 +42,7 @@ public class ReissueService {
         if(refresh == null){
             return new ReissueResponse("Refresh NULL","Refresh NULL " +
                     "[ Time : " +LocalDateTime.now() +
-                    " ]",null);
+                    " ]",null,null);
         }
 
         try{
@@ -51,12 +51,12 @@ public class ReissueService {
         }catch (ExpiredJwtException e){
             return new ReissueResponse("Refresh EXPIRED","Refresh EXPIRED " +
                     "[ Time : " + LocalDateTime.now() +
-                    " ]",null);
+                    " ]",null,null);
         }
 
         return new ReissueResponse("Refresh EXISTS","Refresh EXISTS " +
                 "[ Time : " + LocalDateTime.now() +
-                " ]",resetAccessToken(request));
+                " ]",resetAccessToken(request),reissueRefresh(request));
     }
 
     private String resetAccessToken(HttpServletRequest request){
@@ -69,4 +69,20 @@ public class ReissueService {
 
     }
 
+    public String reissueRefresh(HttpServletRequest request){
+
+        String refresh = findCookie(request);
+        String username = jwtUtil.getUsername(refresh);
+        String role = jwtUtil.getRole(refresh);
+        return jwtUtil.createJwt("refresh",username,role,8640000L);
+    }
+
+    public Cookie createCookie(String key,String value){
+
+        Cookie cookie = new Cookie(key,value);
+        cookie.setMaxAge(24*60*60);
+        cookie.setHttpOnly(true);
+
+        return cookie;
+    }
 }

@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.kangwooju.skeleton_user.common.security.filter.JWTFilter;
 import org.kangwooju.skeleton_user.common.security.filter.LoginFilter;
+import org.kangwooju.skeleton_user.common.security.service.ReissueService;
 import org.kangwooju.skeleton_user.common.security.util.JwtUtil;
 import org.kangwooju.skeleton_user.domain.user.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
@@ -32,6 +33,7 @@ public class SecurityConfig {
     private final ObjectMapper objectMapper;
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
+    private final ReissueService reissueService;
 
     @Bean
     public JWTFilter jwtFilter(){
@@ -42,7 +44,7 @@ public class SecurityConfig {
     // LoginFilter를 Config에서 bean으로 등록
     @Bean
     public LoginFilter loginFilter() throws Exception{
-        return new LoginFilter(objectMapper,authenticationManager(authenticationConfiguration),jwtUtil);
+        return new LoginFilter(objectMapper,authenticationManager(authenticationConfiguration),jwtUtil,reissueService);
     }
 
     @Bean

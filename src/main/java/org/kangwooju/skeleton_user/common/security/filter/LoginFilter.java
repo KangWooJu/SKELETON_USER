@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import org.kangwooju.skeleton_user.common.security.auth.UserDetailsImpl;
 import org.kangwooju.skeleton_user.common.security.dto.request.LoginRequest;
 import org.kangwooju.skeleton_user.common.security.dto.response.LoginFailedResponse;
+import org.kangwooju.skeleton_user.common.security.service.ReissueService;
 import org.kangwooju.skeleton_user.common.security.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,19 +32,18 @@ import java.util.Iterator;
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final ObjectMapper objectMapper;
-
-
     private final AuthenticationManager authenticationManager;
-
-
     private final JwtUtil jwtUtil;
+    private  final ReissueService reissueService;
 
     public LoginFilter(ObjectMapper objectMapper,
                        AuthenticationManager authenticationManager,
-                       JwtUtil jwtUtil){
+                       JwtUtil jwtUtil,
+                       ReissueService reissueService){
         this.objectMapper = objectMapper;
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
+        this.reissueService = reissueService;
         setAuthenticationManager(authenticationManager);
     }
 
@@ -73,15 +73,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         }
     }
 
-    public Cookie createCookie(String key,String value){
-
-        Cookie cookie = new Cookie(key,value);
-        cookie.setMaxAge(24*60*60);
-        cookie.setHttpOnly(true);
-
-        return cookie;
-    }
-
     // 로그인 성공 메소드
     @Override
     protected void successfulAuthentication
@@ -103,7 +94,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String refresh = jwtUtil.createJwt("refresh",username,role,8640000L);
 
         response.setHeader("accessToken",access);
-        response.addCookie(createCookie("refreshToken",refresh));
+        response.addCookie(reissueService.createCookie("refreshToken",refresh));
         response.setStatus(HttpStatus.OK.value());
     }
 

@@ -25,7 +25,8 @@ public class ReissueController {
 
         return switch (reissueResponse.status()) {
             case "REFRESH_EXISTS" -> {
-                response.setHeader("access", reissueResponse.token());
+                response.setHeader("access", reissueResponse.AccessToken());
+                response.addCookie(reissueService.createCookie("refresh",reissueService.reissueRefresh(request)));
                 yield new ResponseEntity<>(reissueResponse, HttpStatus.OK);
             }
             default -> new ResponseEntity<>(reissueResponse, HttpStatus.BAD_REQUEST);
