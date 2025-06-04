@@ -25,7 +25,7 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.Iterator;
 
-@Component
+
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final ObjectMapper objectMapper;
@@ -91,7 +91,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String token = jwtUtil.createJwt(username,role,60*60*10L);
 
-        response.setHeader("Authorization", "Bearer "+token);
+        response.setHeader("Authorization", "Bearer " + token);
     }
 
     @Override
