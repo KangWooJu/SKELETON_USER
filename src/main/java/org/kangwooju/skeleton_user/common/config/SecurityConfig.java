@@ -35,7 +35,7 @@ public class SecurityConfig {
 
     @Bean
     public JWTFilter jwtFilter(){
-        return new JWTFilter(jwtUtil,userRepository);
+        return new JWTFilter(jwtUtil,userRepository,objectMapper);
     }
 
 
@@ -77,7 +77,7 @@ public class SecurityConfig {
                 .addFilterAt(loginFilter,
                         UsernamePasswordAuthenticationFilter.class); // 필터 순서 2
         httpSecurity
-                .addFilterBefore(jwtFilter()    , LoginFilter.class); // 필터 순서 1
+                .addFilterBefore(jwtFilter(), LoginFilter.class); // 필터 순서 1
 
         // CORS 설정
         httpSecurity
