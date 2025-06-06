@@ -3,16 +3,12 @@ package org.kangwooju.skeleton_user.common.security.filter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
-import org.kangwooju.skeleton_user.common.security.auth.UserDetailsImpl;
 import org.kangwooju.skeleton_user.common.security.dto.request.LoginRequest;
 import org.kangwooju.skeleton_user.common.security.dto.response.LoginFailedResponse;
 import org.kangwooju.skeleton_user.common.security.service.ReissueService;
 import org.kangwooju.skeleton_user.common.security.util.JwtUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -21,7 +17,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -92,6 +87,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String access = jwtUtil.createJwt("access",username,role,600000L);
         String refresh = jwtUtil.createJwt("refresh",username,role,8640000L);
+
+        reissueService.addRefresh(username,refresh,86400000L);
 
         response.setHeader("accessToken",access);
         response.addCookie(reissueService.createCookie("refreshToken",refresh));

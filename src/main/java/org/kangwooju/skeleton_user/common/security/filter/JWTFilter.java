@@ -13,18 +13,14 @@ import org.kangwooju.skeleton_user.common.security.dto.response.InvalidTokenCate
 import org.kangwooju.skeleton_user.common.security.util.JwtUtil;
 import org.kangwooju.skeleton_user.domain.user.entity.User;
 import org.kangwooju.skeleton_user.domain.user.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.time.LocalDateTime;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Predicate;
+
 
 
 @Slf4j
