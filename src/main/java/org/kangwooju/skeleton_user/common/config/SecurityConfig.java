@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.kangwooju.skeleton_user.common.security.filter.JWTFilter;
 import org.kangwooju.skeleton_user.common.security.filter.LoginFilter;
+import org.kangwooju.skeleton_user.common.security.filter.LogoutFilter;
 import org.kangwooju.skeleton_user.common.security.service.ReissueService;
 import org.kangwooju.skeleton_user.common.security.util.JwtUtil;
 import org.kangwooju.skeleton_user.domain.user.repository.UserRepository;
@@ -18,6 +19,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -34,6 +36,7 @@ public class SecurityConfig {
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
     private final ReissueService reissueService;
+
 
     @Bean
     public JWTFilter jwtFilter(){
