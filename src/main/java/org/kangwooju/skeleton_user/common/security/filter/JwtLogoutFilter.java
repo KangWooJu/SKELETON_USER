@@ -21,7 +21,7 @@ import java.util.function.Predicate;
 
 
 @RequiredArgsConstructor
-public class LogoutFilter extends OncePerRequestFilter {
+public class JwtLogoutFilter extends OncePerRequestFilter {
 
     private final RefreshRepository refreshRepository;
     private final JwtUtil jwtUtil;
