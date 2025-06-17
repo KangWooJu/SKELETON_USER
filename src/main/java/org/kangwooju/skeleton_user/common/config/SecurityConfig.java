@@ -4,8 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.kangwooju.skeleton_user.common.security.filter.JWTFilter;
+import org.kangwooju.skeleton_user.common.security.filter.JwtLogoutFilter;
 import org.kangwooju.skeleton_user.common.security.filter.LoginFilter;
-import org.kangwooju.skeleton_user.common.security.filter.LogoutFilter;
+import org.kangwooju.skeleton_user.common.security.repository.RefreshRepository;
 import org.kangwooju.skeleton_user.common.security.service.ReissueService;
 import org.kangwooju.skeleton_user.common.security.util.JwtUtil;
 import org.kangwooju.skeleton_user.domain.user.repository.UserRepository;
@@ -36,6 +37,7 @@ public class SecurityConfig {
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
     private final ReissueService reissueService;
+    private final RefreshRepository refreshRepository;
 
 
     @Bean
@@ -43,11 +45,15 @@ public class SecurityConfig {
         return new JWTFilter(jwtUtil,userRepository,objectMapper);
     }
 
-
     // LoginFilter를 Config에서 bean으로 등록
     @Bean
     public LoginFilter loginFilter() throws Exception{
         return new LoginFilter(objectMapper,authenticationManager(authenticationConfiguration),jwtUtil,reissueService);
+    }
+
+    @Bean
+    public JwtLogoutFilter jwtlogoutFilter() throws Exception{
+        return new JwtLogoutFilter(refreshRepository,jwtUtil,reissueService);
     }
 
     @Bean
@@ -80,9 +86,11 @@ public class SecurityConfig {
 
         httpSecurity
                 .addFilterAt(loginFilter,
-                        UsernamePasswordAuthenticationFilter.class); // 필터 순서 2
+                        UsernamePasswordAuthenticationFilter.class); // 필터 순서 2 ( 로그인 )
         httpSecurity
-                .addFilterBefore(jwtFilter(), LoginFilter.class); // 필터 순서 1
+                .addFilterBefore(jwtFilter(), LoginFilter.class); // 필터 순서 1 ( 로그인 )
+        httpSecurity
+                .addFilterBefore(jwtlogoutFilter(), LogoutFilter.class); // 필터순서 1 ( 로그아웃 )
 
         // CORS 설정
         httpSecurity
