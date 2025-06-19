@@ -2,6 +2,7 @@ package org.kangwooju.skeleton_user.common.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.AllArgsConstructor;
 import org.kangwooju.skeleton_user.common.exception.CustomException;
 import org.kangwooju.skeleton_user.common.exception.ErrorCode;
 import org.springframework.http.HttpStatus;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 
 @Builder
 @Getter
+@AllArgsConstructor
 public class ApiErrorResponse {
 
     private final HttpStatus httpStatus;
