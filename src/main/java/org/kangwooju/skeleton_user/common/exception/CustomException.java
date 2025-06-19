@@ -1,9 +1,12 @@
 package org.kangwooju.skeleton_user.common.exception;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-@RequiredArgsConstructor
+@AllArgsConstructor
+@Getter
 public class CustomException extends RuntimeException{
 
-    private final ErrorCode errorCode;
+    private ErrorCode errorCode;
+
 }
