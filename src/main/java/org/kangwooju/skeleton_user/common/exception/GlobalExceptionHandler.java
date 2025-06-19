@@ -1,6 +1,6 @@
 package org.kangwooju.skeleton_user.common.exception;
 
-import org.kangwooju.skeleton_user.common.dto.response.CustomErrorResponse;
+import org.kangwooju.skeleton_user.common.dto.response.ApiErrorResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(CustomException.class)
-    public ResponseEntity<CustomErrorResponse> handleCustomException(CustomException e){
+    public ResponseEntity<ApiErrorResponse> handleCustomException(CustomException e){
 
-        return CustomErrorResponse.error(e);
+        return ApiErrorResponse.error(e);
     }
 }
