@@ -1,5 +1,7 @@
 package org.kangwooju.skeleton_user.domain.user.service;
 
+import org.kangwooju.skeleton_user.common.exception.CustomException;
+import org.kangwooju.skeleton_user.common.exception.ErrorCode;
 import org.springframework.transaction.annotation.Transactional;
 import org.kangwooju.skeleton_user.domain.user.dto.request.UserCreationRequest;
 import org.kangwooju.skeleton_user.domain.user.dto.response.UserCreationResponse;
@@ -22,7 +24,7 @@ public class UserService {
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Transactional
-    public UserCreationResponse Usercreate
+    public UserCreationResponse userCreate
             (UserCreationRequest userCreationRequest){
 
         // 중복여부 체크 메소드 먼저 실행
@@ -47,30 +49,19 @@ public class UserService {
 
     @Transactional(readOnly = true)
     // 회원가입 시 Username 중복을 테스트 하는 로직
-    public boolean TestDuplicationUsername(String username){
+    public void testDuplicationUsername(String username){
 
-        User findUser = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Username중복"));
-        // 커스텀 예외처리로 변경 예정
-
-        BiPredicate<String,String> matches = String::equals;
-        boolean result = matches.test(findUser.getUsername(),username);
-        return result;
-
+        if(userRepository.findByUsername(username).isPresent()){
+            throw new CustomException(ErrorCode.USER_USERNAME_DUPLICATED);
+        }
     }
 
     @Transactional(readOnly = true)
     // 회원가입 시 Nickname 중복을 테스트 하는 로직
-    public boolean TestDuplicationNickname(String nickname){
+    public void testDuplicationNickname(String nickname){
 
-        User findUser = userRepository.findByNickname(nickname)
-                .orElseThrow(()-> new RuntimeException("nickname중복"));
-        // 커스텀 예외처리로 변경 예정
-
-        BiPredicate<String,String> matches = String::equals;
-        boolean result = matches.test(findUser.getNickname(),nickname);
-
-        return result;
+        if(userRepository.findByNickname(nickname).isPresent()){
+            throw new CustomException(ErrorCode.USER_NICKNAME_DUPLICATED);
+        }
     }
-
 }

@@ -10,7 +10,6 @@ import org.kangwooju.skeleton_user.common.security.entity.Refresh;
 import org.kangwooju.skeleton_user.common.security.repository.RefreshRepository;
 import org.kangwooju.skeleton_user.common.security.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
