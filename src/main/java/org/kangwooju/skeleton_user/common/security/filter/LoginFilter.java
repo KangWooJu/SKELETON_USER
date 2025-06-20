@@ -5,6 +5,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.kangwooju.skeleton_user.common.security.dto.request.LoginRequest;
 import org.kangwooju.skeleton_user.common.security.dto.response.LoginFailedResponse;
 import org.kangwooju.skeleton_user.common.security.service.ReissueService;
@@ -20,10 +21,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Iterator;
 
 
+@Slf4j
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final ObjectMapper objectMapper;
@@ -41,7 +44,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         this.reissueService = reissueService;
         setAuthenticationManager(authenticationManager);
     }
-
 
     @Override
     public Authentication attemptAuthentication
@@ -93,6 +95,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.setHeader("accessToken",access);
         response.addCookie(reissueService.createCookie("refreshToken",refresh));
         response.setStatus(HttpStatus.OK.value());
+        log.info("[ 로그인 성공 ] TIME : {} , USER : {} ", LocalDateTime.now(),username);
     }
 
     @Override
