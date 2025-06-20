@@ -1,0 +1,21 @@
+spring:
+  session:
+    jdbc:
+      initialize-schema: always # 스프링 부트가 세션을 자동 생성하도록 설정
+
+  datasource: # dataSource에 DB정보 포함하기 -> 다중 DB의 경우 AppConfig에서 수동 설정 필요
+    url: ${MYSQL_URL}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa: # JPA 설정
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+  jwt:
+    secret: ${JWT_SECRET}
