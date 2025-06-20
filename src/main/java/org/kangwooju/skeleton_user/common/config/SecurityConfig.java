@@ -21,6 +21,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -38,22 +39,29 @@ public class SecurityConfig {
     private final UserRepository userRepository;
     private final ReissueService reissueService;
     private final RefreshRepository refreshRepository;
+    private final AntPathMatcher antPathMatcher;
 
 
     @Bean
     public JWTFilter jwtFilter(){
-        return new JWTFilter(jwtUtil,userRepository,objectMapper);
+        return new JWTFilter(jwtUtil,
+                userRepository,
+                objectMapper,
+                antPathMatcher);
     }
 
     // LoginFilter를 Config에서 bean으로 등록
     @Bean
     public LoginFilter loginFilter() throws Exception{
-        return new LoginFilter(objectMapper,authenticationManager(authenticationConfiguration),jwtUtil,reissueService);
+        return new LoginFilter(objectMapper,
+                authenticationManager(authenticationConfiguration),
+                jwtUtil,
+                reissueService);
     }
 
     @Bean
     public JwtLogoutFilter jwtlogoutFilter() throws Exception{
-        return new JwtLogoutFilter(refreshRepository,jwtUtil,reissueService);
+        return new JwtLogoutFilter(jwtUtil,reissueService);
     }
 
     @Bean
