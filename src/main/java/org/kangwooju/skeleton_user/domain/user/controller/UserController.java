@@ -31,7 +31,7 @@ public class UserController {
     }
 
     // 유저의 nickname 중복 API
-    @GetMapping("/check-nicnkame")
+    @GetMapping("/check-nickname")
     public ResponseEntity<?> checkNicknameDuplication
     (@RequestParam String nickname){
 
