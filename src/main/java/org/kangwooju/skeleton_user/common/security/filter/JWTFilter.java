@@ -47,7 +47,6 @@ public class JWTFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         String accessToken = extractToken(request);
-        String category = jwtUtil.getCategory(accessToken);
         // 토큰이 비었는지 검사
         if(accessToken == null){
             log.info(" AccessToken NULL "+" [ Time : " + LocalDateTime.now() + " ]");
@@ -62,9 +61,10 @@ public class JWTFilter extends OncePerRequestFilter {
             jwtUtil.isExpired(accessToken);
         } catch (ExpiredJwtException e){
             handleExpiredJwt(response);
-            filterChain.doFilter(request,response);
             return;
         }
+
+        String category = jwtUtil.getCategory(accessToken);
 
         if(!category.equals("access")){
             log.info("Token Invalid Category " + " [ Time : " + LocalDateTime.now() + " ]");

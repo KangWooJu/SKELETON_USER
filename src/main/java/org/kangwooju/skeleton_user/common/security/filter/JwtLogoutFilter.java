@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.kangwooju.skeleton_user.common.security.filter.response.FilterErrorResponse;
 import org.kangwooju.skeleton_user.common.security.filter.response.FilterSuccessResponse;
 import org.kangwooju.skeleton_user.common.security.repository.RefreshRepository;
@@ -21,6 +22,7 @@ import java.util.function.Predicate;
 
 
 @RequiredArgsConstructor
+@Slf4j
 public class JwtLogoutFilter extends OncePerRequestFilter {
 
     private final RefreshRepository refreshRepository;
@@ -28,30 +30,33 @@ public class JwtLogoutFilter extends OncePerRequestFilter {
     private final ReissueService reissueService;
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request)
+            throws ServletException {
+        return !("/logout".equals(request.getRequestURI())
+                &&"POST".equalsIgnoreCase(request.getMethod()));
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        // URI와 Method가 일치하는지 검사
-        if(!checkInvalidLogout(request).error()){
-            JsonResponseUtils.writeJsonResponse(HttpStatus.BAD_REQUEST,
-                    response
-                    ,checkInvalidLogout(request));
+        log.info("[ 로그아웃 필터 실행 ] URI : {} , TIME : {} "
+                ,request.getRequestURI()
+                ,LocalDateTime.now());
+
+        String refresh = reissueService.findCookie(request);
+        log.info("[ Refresh Token ] : " + refresh);
+
+        // Refresh토큰에 오류가 있는지 검사
+        if(checkRefresh(refresh).error()){
+            log.info(" [ Refresh Token 오류 발생 ] TIME : {} ",LocalDateTime.now());
             filterChain.doFilter(request,response);
             return;
         }
 
-        String refresh = reissueService.findCookie(request);
-
-        // Refresh토큰에 오류가 있는지 검사
-        if(!checkRefresh(refresh).error()){
-            JsonResponseUtils.writeJsonResponse(HttpStatus.BAD_REQUEST,
-                    response,
-                    checkInvalidLogout(request));
-        }
-
         // Refresh 삭제하기
-        refreshRepository.deleteByRefresh(refresh);
+        reissueService.deleteRefresh(refresh);
         // Cookie를 빈 쿠키로 설정하기
         reissueService.zeroCookie(response);
         // 로그아웃 성공 Response반환
@@ -62,34 +67,11 @@ public class JwtLogoutFilter extends OncePerRequestFilter {
                         "로그아웃에 성공하였습니다.",
                         LocalDateTime.now().toString())
                 );
+        log.info(" [ 로그아웃 성공 ] TIME : {}",LocalDateTime.now());
     }
-
-    // 1st. URI와 Method를 검사
-    private FilterErrorResponse checkInvalidLogout(HttpServletRequest request){
-
-        Predicate<HttpServletRequest> logoutRequest =
-                requestParam -> "/logout".equals(requestParam.getRequestURI())&&
-                        "POST".equals(requestParam.getMethod());
-
-        FilterErrorResponse apiErrorResponse =
-                new FilterErrorResponse(false,
-                        "Method : " + request.getMethod(),
-                        "API의 URI 혹은 Method 타입이 불일치합니다.\n"
-                                +"URI : " + request.getRequestURI() + "\n"
-                                +"Method : " + request.getMethod() + "\n",
-                        "Time : " + LocalDateTime.now());
-
-        return apiErrorResponse;
-
-    }
-
 
     // 2rd. Refresh토큰을 검사
     private FilterErrorResponse checkRefresh(String refresh){
-
-        Predicate<String> checkingRefresh = stringParam -> StringUtils.isBlank(stringParam)&&
-                jwtUtil.isExpired(stringParam)&&
-                !jwtUtil.getCategory(stringParam).equals("refresh");
 
         Predicate<String> checkNull = StringParam
                 -> StringUtils.isBlank(StringParam); // NULL 체크하기
@@ -100,10 +82,23 @@ public class JwtLogoutFilter extends OncePerRequestFilter {
         Predicate<String> checkCategory = StringParam
                 -> !"refresh".equals(jwtUtil.getCategory(StringParam)); // 카테고리 일치여부 확인하기
 
+        String strCheckNull = ""+checkNull.test(refresh);
+        String strCheckExpiration = "" + checkExpiration.test(refresh);
+        String strCheckCategory = "" + checkCategory.test(refresh);
+
+        log.info("Method : POST , "+
+                "Refresh NULL : " + strCheckNull + " ,"
+                        +"Expiration : " + strCheckExpiration + " ,"
+                        +"Category : " + strCheckCategory);
+
+        boolean result = (checkNull.test(refresh)
+                &&checkCategory.test(refresh)
+                &&checkExpiration.test(refresh));
+
 
         FilterErrorResponse apiErrorResponse =
-                new FilterErrorResponse(false,
-                        "Method ",
+                new FilterErrorResponse(result,
+                        "Method : POST",
                         "Refresh NULL : " + checkNull.test(refresh) + "\n"
                                 +"Expiration : " + checkExpiration.test(refresh) + "\n"
                                 +"Category : " + checkCategory.test(refresh),
@@ -112,9 +107,4 @@ public class JwtLogoutFilter extends OncePerRequestFilter {
 
         return apiErrorResponse;
     }
-
-
-
-
-
 }
