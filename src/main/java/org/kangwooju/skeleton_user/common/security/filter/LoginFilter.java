@@ -100,7 +100,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             (HttpServletRequest request,
              HttpServletResponse response,
              AuthenticationException failed)
-            throws IOException, ServletException {
+            throws IOException {
 
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
         response.setContentType("application/json");
@@ -114,5 +114,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String json = objectMapper.writeValueAsString(loginFailedResponse);
 
         response.getWriter().write(json); // 프론트에서 JSON 형식을 받아 사용할 수 있도록 전달
+        response.getWriter().flush();
+        response.flushBuffer();
     }
 }
