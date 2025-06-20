@@ -25,9 +25,9 @@ import java.util.function.Predicate;
 @Slf4j
 public class JwtLogoutFilter extends OncePerRequestFilter {
 
-    private final RefreshRepository refreshRepository;
     private final JwtUtil jwtUtil;
     private final ReissueService reissueService;
+
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request)
