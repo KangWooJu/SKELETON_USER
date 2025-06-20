@@ -34,7 +34,7 @@ public class ReissueService {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if ("refresh".equals(cookie.getName())) {
+                if ("refreshToken".equals(cookie.getName())) {
                     refresh = cookie.getValue();
                 }
             }
@@ -126,5 +126,10 @@ public class ReissueService {
         response.addCookie(cookie);
         response.setStatus(HttpStatus.OK.value());
 
+    }
+
+    @Transactional
+    public void deleteRefresh(String refresh){
+        refreshRepository.deleteByRefresh(refresh);
     }
 }
