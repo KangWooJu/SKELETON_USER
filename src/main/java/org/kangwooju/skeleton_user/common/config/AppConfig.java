@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.util.AntPathMatcher;
 
 @Configuration
 @EnableTransactionManagement
@@ -15,6 +16,11 @@ public class AppConfig {
     @Bean
     public ObjectMapper objectMapper(){
         return new ObjectMapper();
+    }
+
+    @Bean
+    public AntPathMatcher antPathMatcher(){
+        return new AntPathMatcher();
     }
 
 }

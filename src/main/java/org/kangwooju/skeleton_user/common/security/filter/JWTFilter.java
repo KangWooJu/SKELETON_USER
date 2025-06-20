@@ -17,6 +17,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -31,14 +32,25 @@ public class JWTFilter extends OncePerRequestFilter {
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
 
+    private final AntPathMatcher antPathMatcher;
+
     public JWTFilter(JwtUtil jwtUtil,
                      UserRepository userRepository,
-                     ObjectMapper objectMapper){
+                     ObjectMapper objectMapper,
+                     AntPathMatcher antPathMatcher){
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
         this.objectMapper = objectMapper;
+        this.antPathMatcher = antPathMatcher;
+    }
 
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getRequestURI();
 
+        return antPathMatcher.match("/login",path)||
+                antPathMatcher.match("/refresh",path)||
+                antPathMatcher.match("/user/**",path);
     }
 
     @Override
