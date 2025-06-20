@@ -116,7 +116,7 @@ public class SecurityConfig {
         // Http 주소허용 여부 설정 -> Default
         httpSecurity
                 .authorizeHttpRequests((auth)->auth
-                        .requestMatchers("/login", "/","/user/**").permitAll()
+                        .requestMatchers("/login","/user/**").permitAll()
                         .requestMatchers("/refresh").permitAll()
                         .anyRequest().authenticated()
                 );
