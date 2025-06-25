@@ -38,7 +38,6 @@ public class SecurityConfig {
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
     private final ReissueService reissueService;
-    private final RefreshRepository refreshRepository;
     private final AntPathMatcher antPathMatcher;
 
 
