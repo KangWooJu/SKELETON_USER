@@ -52,4 +52,15 @@ public class UserController {
                         LocalDateTime.now().toString()));
     }
 
+    // 유저의 nickname을 변경하는 API
+    @PatchMapping("/update/nickname")
+    public ResponseEntity<ApiSuccessResponse> updateNickname
+            (@RequestParam String nickname,@RequestParam String accessToken){
+
+        userService.updateNickname(accessToken,nickname);
+        return ResponseEntity.ok(new ApiSuccessResponse("사용자의 닉네임이 변경되었습니다.",
+                LocalDateTime.now().toString()));
+    }
+
+
 }

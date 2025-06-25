@@ -2,6 +2,7 @@ package org.kangwooju.skeleton_user.domain.user.service;
 
 import org.kangwooju.skeleton_user.common.exception.CustomException;
 import org.kangwooju.skeleton_user.common.exception.ErrorCode;
+import org.kangwooju.skeleton_user.common.security.util.JwtUtil;
 import org.springframework.transaction.annotation.Transactional;
 import org.kangwooju.skeleton_user.domain.user.dto.request.UserCreationRequest;
 import org.kangwooju.skeleton_user.domain.user.dto.response.UserCreationResponse;
@@ -22,6 +23,8 @@ public class UserService {
     private UserRepository userRepository;
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Transactional
     public UserCreationResponse userCreate
@@ -63,5 +66,26 @@ public class UserService {
         if(userRepository.findByNickname(nickname).isPresent()){
             throw new CustomException(ErrorCode.USER_NICKNAME_DUPLICATED);
         }
+    }
+
+    /*
+    @Transactional
+    public void deleteUser(String accessToken){
+
+        User user = userRepository.findByUsername(jwtUtil.getUsername(accessToken))
+                .orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        userRepository.delete(user);
+    }
+
+     */
+
+    @Transactional
+    public void updateNickname(String accessToken,String nickname){
+
+        User user = userRepository.findByUsername(jwtUtil.getUsername(accessToken))
+                .orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        userRepository.updateUserById(user.getId(),nickname);
     }
 }
