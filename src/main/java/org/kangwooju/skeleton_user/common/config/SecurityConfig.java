@@ -78,7 +78,7 @@ public class SecurityConfig {
 
     // 시큐리티 필터 체인 설정
     @Bean
-    public SecurityFilterChain SecurityfilterChain(HttpSecurity httpSecurity,
+    public SecurityFilterChain securityfilterChain(HttpSecurity httpSecurity,
                                                    LoginFilter loginFilter)
             throws Exception {
 
@@ -123,7 +123,7 @@ public class SecurityConfig {
         // Http 주소허용 여부 설정 -> Default
         httpSecurity
                 .authorizeHttpRequests((auth)->auth
-                        .requestMatchers("/login","/user/**").permitAll()
+                        .requestMatchers("/login","/user/create","/user/check-nickname","/user/check-username").permitAll()
                         .requestMatchers("/refresh").permitAll()
                         .anyRequest().authenticated()
                 );

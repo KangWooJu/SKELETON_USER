@@ -50,7 +50,8 @@ public class JWTFilter extends OncePerRequestFilter {
 
         return antPathMatcher.match("/login",path)||
                 antPathMatcher.match("/refresh",path)||
-                antPathMatcher.match("/user/**",path);
+                antPathMatcher.match("/user/check-nickname", path) ||
+                antPathMatcher.match("/user/check-username", path);
     }
 
     @Override
@@ -83,6 +84,8 @@ public class JWTFilter extends OncePerRequestFilter {
             handleInvalidTokenCategory(response,category);
             return;
         }
+
+        log.info("잘된다눙");
 
         // makeToken()메소드를 사용해서 토큰 생성 후
         SecurityContextHolder.getContext().setAuthentication(makeToken(accessToken));

@@ -1,12 +1,17 @@
 package org.kangwooju.skeleton_user.domain.user.controller;
 
+import jakarta.validation.Valid;
 import org.kangwooju.skeleton_user.common.dto.response.ApiSuccessResponse;
+import org.kangwooju.skeleton_user.domain.user.dto.request.UserChangeNicknameRequest;
 import org.kangwooju.skeleton_user.domain.user.dto.request.UserCreationRequest;
 import org.kangwooju.skeleton_user.domain.user.dto.response.UserCreationResponse;
 import org.kangwooju.skeleton_user.domain.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -21,7 +26,7 @@ public class UserController {
     // 회원 생성하기 : 중복 검사 API 실행 후 request 필요
     @PostMapping("/create")
     public ResponseEntity<UserCreationResponse> createUser
-    (@RequestBody UserCreationRequest request){
+    (@Valid @RequestBody UserCreationRequest request){
 
         UserCreationResponse response = userService.userCreate(request);
         return ResponseEntity
@@ -55,10 +60,17 @@ public class UserController {
     // 유저의 nickname을 변경하는 API
     @PatchMapping("/update/nickname")
     public ResponseEntity<ApiSuccessResponse> updateNickname
-            (@RequestParam String nickname,@RequestParam String accessToken){
+            (@Valid
+             @RequestParam String nickname){
 
-        userService.updateNickname(accessToken,nickname);
-        return ResponseEntity.ok(new ApiSuccessResponse("사용자의 닉네임이 변경되었습니다.",
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        System.out.println(username);
+
+        userService.updateNickname(nickname);
+
+        return ResponseEntity
+                .ok(new ApiSuccessResponse("사용자의 닉네임이 변경되었습니다.\n",
                 LocalDateTime.now().toString()));
     }
 

@@ -3,6 +3,10 @@ package org.kangwooju.skeleton_user.domain.user.service;
 import org.kangwooju.skeleton_user.common.exception.CustomException;
 import org.kangwooju.skeleton_user.common.exception.ErrorCode;
 import org.kangwooju.skeleton_user.common.security.util.JwtUtil;
+import org.kangwooju.skeleton_user.domain.user.dto.request.UserChangeNicknameRequest;
+import org.kangwooju.skeleton_user.domain.user.vo.Nickname;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.kangwooju.skeleton_user.domain.user.dto.request.UserCreationRequest;
 import org.kangwooju.skeleton_user.domain.user.dto.response.UserCreationResponse;
@@ -14,7 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.function.BiPredicate;
+
 
 @Service
 public class UserService {
@@ -35,7 +39,7 @@ public class UserService {
         User user = User.builder()
                 .username(userCreationRequest.username())
                 .password(bCryptPasswordEncoder.encode(userCreationRequest.password()))
-                .nickname(userCreationRequest.nickname())
+                .nickname(new Nickname(userCreationRequest.nickname()))
                 .createDate(LocalDateTime.now())
                 .role(Role.NORMAL) // 일반 유저의 경우 Role.NORMAL 타입으로 설정
                 .build();
@@ -81,11 +85,17 @@ public class UserService {
      */
 
     @Transactional
-    public void updateNickname(String accessToken,String nickname){
+    public void updateNickname(String nickname){
 
-        User user = userRepository.findByUsername(jwtUtil.getUsername(accessToken))
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+
+        System.out.println("✅ 인증된 사용자명: '" + username + "'");
+
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        userRepository.updateUserById(user.getId(),nickname);
+        user.updateNickname(new Nickname(nickname));
+
     }
 }
