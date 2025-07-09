@@ -2,6 +2,7 @@ package org.kangwooju.skeleton_user.domain.user.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.kangwooju.skeleton_user.domain.user.vo.Nickname;
 
 import java.time.LocalDateTime;
 
@@ -22,8 +23,8 @@ public class User {
     @Column(name="user_password",nullable = false)
     private String password;
 
-    @Column(name="user_nickname",nullable = false,unique = true)
-    private String nickname;
+    @Embedded
+    private Nickname nickname;
 
     @Column(name="user_createDate",nullable = false)
     private LocalDateTime createDate;
@@ -31,5 +32,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(name="user_level",nullable = false)
     private Role role;
+
+    public void updateNickname(Nickname nickname){
+        this.nickname = nickname;
+    }
 }
 
