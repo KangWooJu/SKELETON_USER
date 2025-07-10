@@ -1,6 +1,6 @@
 ---
 name: Feature⭐️
-about: Suggest an idea for this project
+about: '새로운 기능 추가 '
 title: "[페이지명] 내용"
 labels: ''
 assignees: ''

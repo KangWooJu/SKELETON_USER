@@ -1,6 +1,6 @@
 ---
-name: Bug(fix)
-about: Create a report to help us improve
+name: "Bug(fix)\U0001F525"
+about: '기존 개발 기능에서 문제 발생 '
 title: ''
 labels: ''
 assignees: ''
