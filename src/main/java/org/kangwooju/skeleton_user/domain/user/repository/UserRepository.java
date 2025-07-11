@@ -17,7 +17,7 @@ public interface UserRepository extends JpaRepository<User,Long> {
 
 
     @Modifying(clearAutomatically = true)
-    @Query("update User u set u.nickname = :nickname where u.id = :id")
+    @Query("update User u set u.nickname.nickname = :nickname where u.id = :id")
     int updateUserById(@Param("id") Long id,@Param("nickname") String nickname);
 
 }

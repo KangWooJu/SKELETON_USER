@@ -72,25 +72,11 @@ public class UserService {
         }
     }
 
-    /*
-    @Transactional
-    public void deleteUser(String accessToken){
-
-        User user = userRepository.findByUsername(jwtUtil.getUsername(accessToken))
-                .orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        userRepository.delete(user);
-    }
-
-     */
-
     @Transactional
     public ApiSuccessResponse updateNickname(String nickname){
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
-
-        System.out.println("✅ 인증된 사용자명: '" + username + "'");
 
         User user = userRepository.findByUsername(username)
                 .orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND));
