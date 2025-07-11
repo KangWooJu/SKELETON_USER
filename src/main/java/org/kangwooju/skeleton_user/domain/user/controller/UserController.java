@@ -67,11 +67,11 @@ public class UserController {
         String username = authentication.getName();
         System.out.println(username);
 
-        userService.updateNickname(nickname);
+        ApiSuccessResponse response = userService.updateNickname(nickname);
 
         return ResponseEntity
-                .ok(new ApiSuccessResponse("사용자의 닉네임이 변경되었습니다.\n",
-                LocalDateTime.now().toString()));
+                .status(HttpStatus.OK)
+                .body(response);
     }
 
 
