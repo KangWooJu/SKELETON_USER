@@ -1,9 +1,9 @@
 package org.kangwooju.skeleton_user.domain.user.service;
 
+import org.kangwooju.skeleton_user.common.dto.response.ApiSuccessResponse;
 import org.kangwooju.skeleton_user.common.exception.CustomException;
 import org.kangwooju.skeleton_user.common.exception.ErrorCode;
 import org.kangwooju.skeleton_user.common.security.util.JwtUtil;
-import org.kangwooju.skeleton_user.domain.user.dto.request.UserChangeNicknameRequest;
 import org.kangwooju.skeleton_user.domain.user.vo.Nickname;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -85,7 +85,7 @@ public class UserService {
      */
 
     @Transactional
-    public void updateNickname(String nickname){
+    public ApiSuccessResponse updateNickname(String nickname){
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
@@ -95,7 +95,12 @@ public class UserService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        user.updateNickname(new Nickname(nickname));
+        String oldNickname = user.getNickname().getNickname();
 
+        userRepository.updateUserById(user.getId(),nickname);
+
+        return new ApiSuccessResponse("[ 닉네임 변경 ] : " + oldNickname + " -> " + nickname,
+                LocalDateTime.now().toString());
     }
+
 }
