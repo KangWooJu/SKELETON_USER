@@ -85,8 +85,6 @@ public class JWTFilter extends OncePerRequestFilter {
             return;
         }
 
-        log.info("잘된다눙");
-
         // makeToken()메소드를 사용해서 토큰 생성 후
         SecurityContextHolder.getContext().setAuthentication(makeToken(accessToken));
         filterChain.doFilter(request,response); // 다음 필터 진행
